@@ -1,0 +1,11 @@
+.venv/
+runtime/
+dist/
+__pycache__/
+*.py[cod]
+*.zip
+input/*
+!input/.gitkeep
+output/*
+!output/.gitkeep
+~$*
