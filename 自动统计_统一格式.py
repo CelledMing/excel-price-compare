@@ -13,6 +13,8 @@ from contextlib import ExitStack
 from pathlib import Path
 
 import pandas as pd
+from openpyxl.styles import PatternFill
+from openpyxl.utils import get_column_letter
 
 
 STANDARD_COLUMNS = ["商品名称", "规格", "单位", "单价", "优惠90%单价"]
@@ -59,7 +61,7 @@ def normalize_dataframe(df, include_quantity=False):
     """单个商品名称列直接清洗，多个商品名称列分块后纵向拼接。
 
     每遇到新的商品名称列开始下一块，每块同类列只取第一次。
-    序号在商品名称左侧时随对应块一起处理，数量仅供内部使用。
+    序号在商品名称左侧时随对应块一起处理，可按需保留数量。
     左侧只有名称、序号且右侧存在价格表时，跳过左侧辅助列表。
     """
     names = [canonical_column(column) for column in df.columns]
@@ -235,12 +237,19 @@ def excel_reader(input_dir=DEFAULT_INPUT, output_path=None, month=None):
                     source_sheets[path.name] = sheet
                 except ValueError as exc:
                     raise ValueError(f"{path.name} / {sheet}：{exc}") from exc
-            columns = MERGE_KEYS + sources
+            columns = MERGE_KEYS + [column for source in sources for column in (source, f"{source} 数量")]
             outputs[f"{month}.{day}"] = merge_standard_frames(frames, source_sheets).reindex(columns=columns)
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    quantity_fill = PatternFill(fill_type="solid", fgColor="FFFFFF00")
     with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
         for sheet, result in outputs.items():
             result.to_excel(writer, sheet_name=sheet, index=False)
+            worksheet = writer.sheets[sheet]
+            for column_number, column_name in enumerate(result.columns, start=1):
+                worksheet.column_dimensions[get_column_letter(column_number)].width = 20
+                if column_name.endswith(" 数量"):
+                    for row_number in range(1, len(result) + 2):
+                        worksheet.cell(row=row_number, column=column_number).fill = quantity_fill
             print(f"{sheet} 已写入，共 {len(result)} 行")
     print(f"完成：{output_path}")
     return output_path
