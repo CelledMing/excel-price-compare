@@ -41,12 +41,6 @@ excel-price-compare/
   runtime/               内置隔离运行环境（仅便携包包含）
 ```
 
-## 上传 GitHub
-
-将源码包 `excel-price-compare-source.zip` 解压，提交目录内的文件，包括 `.gitignore` 和两个 `.gitkeep`。将 `excel-price-compare-windows-x64.zip` 上传为 GitHub Release 附件。用户无需安装 Python 时，应下载 Release 的便携包；GitHub 的 **Code → Download ZIP** 只提供源码。
-
-`.gitignore` 排除了订单、输出、运行环境、虚拟环境和生成的压缩包。发布文件不包含开发者的订单、旧脚本或机器上的其他资料。第三方许可证保留在便携包 `runtime/LICENSE.txt` 和各依赖的 `.dist-info` 中；核心代码的开源许可证由仓库维护者自行确定。
-
 ## 开发与重新打包
 
 源码开发使用 Windows x64 Python 3.12，创建可重建的虚拟环境：
